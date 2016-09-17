@@ -1,0 +1,13 @@
+html5lib==0.999999999
+isodate==0.5.4
+keepalive==0.5
+lxml==3.4.1
+pyparsing==2.1.9
+rdflib==4.2.1
+rdflib-jsonld==0.4.0
+requests==2.11.1
+six==1.10.0
+SPARQLWrapper==1.7.6
+SQLAlchemy==1.0.15
+webencodings==0.5
+-e git+git@github.com:wikipathways/wikipathways-sql-releaser.git@7937a7219930638a10431a5411b4c7b4302c2929#egg=wikipathways_sql_releaser
