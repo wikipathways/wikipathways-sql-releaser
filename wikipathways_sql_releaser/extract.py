@@ -48,15 +48,77 @@ def download_rdf(version, aspect):
 
 def parse_rdf():
     i = 0
-    for file in glob.glob('*/*/*/*.ttl'):
-        if i < 10:
+    for file in glob.glob('rdf/wp/*/*.ttl'):
+        if i < 1:
             i += 1
             print(file)
             g = Graph()
             g.parse(file, format='turtle')
             print 'g'
             print g
-            # print(g.serialize(format='json-ld', indent=4))
+
+            qres = g.query(
+                '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
+                SELECT DISTINCT ?s
+                WHERE {
+                  ?s a wp:DataNode
+                }''')
+
+#             qres = g.query(
+#                 '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
+#                 SELECT *
+#                 {
+#                   ?s <http://vocabularies.wikipathways.org/wp#isAbout> ?o
+#                 }''')
+
+#             qres = g.query(
+#                 '''SELECT *
+#                 {
+#                   ?s <http://vocabularies.wikipathways.org/wp#isAbout> ?o
+#                 }''')
+
+#             qres = g.query(
+#                 '''SELECT DISTINCT ?s ?o
+#                 {
+#                   ?s <http://vocabularies.wikipathways.org/wp#isAbout> ?o
+#                 }''')
+
+#             qres = g.query(
+#                 '''
+#                 SELECT DISTINCT ?aname ?bname
+#                 WHERE {
+#                   ?a wp:isAbout ?b
+#                 }
+#                 ''')
+
+#             qres = g.query(
+#                 '''SELECT ?aisAbout
+#                 ''')
+
+#             qres = g.query(
+#                 '''@prefix wp:    <http://vocabularies.wikipathways.org/wp#> .
+#                 SELECT DISTINCT ?wp:isAbout
+#                 ''')
+#             print 'qres'
+#             print qres
+#             print ''
+#             print 'type'
+#             print type(qres)
+#             print ''
+#             print 'dir'
+#             print dir(qres)
+#             print ''
+#             print 'qres.__dict__'
+#             print qres.__dict__
+#             print ''
+#             print 'qres.serialize()'
+#             print qres.serialize()
+            for row in qres:
+#                 print 'qres row'
+#                 print row
+                for item in row:
+                    print '  ' + item
+                # print('%s is the id' % row)
 
 # download_rdf(version, 'gpml')
 # download_rdf(version, 'wp')
