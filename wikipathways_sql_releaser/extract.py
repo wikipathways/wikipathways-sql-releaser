@@ -14,6 +14,8 @@ extract_dir = './latest_release'
 os.chdir(extract_dir)
 
 
+# NOTE: we're not currently using this for anything.
+# We're just using the RDF.
 def download_gpml(version):
     latest_release_url = str.join(
         'http://data.wikipathways.org/current/gpml/wikipathways-',
