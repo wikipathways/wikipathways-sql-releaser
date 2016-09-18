@@ -54,31 +54,52 @@ def parse_rdf():
             print(file)
             g = Graph()
             g.parse(file, format='turtle')
-            print 'g'
-            print g
+
+            # at a minimum, get:
+            # interactions with targets that are also interactions
+            # all sources and targets for all the above interactions,
+            #   both primary and secondary
+            #
+            # for each interaction, get:
+            #   id
+            #   first type
+            #   source
+            #   target
+            #
+            # for each datanode, get:
+            #   id
+            #   first type
+            #
+            # if possible, also get all binding and cleavage reactions.
 
             qres = g.query(
                 '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
-                SELECT DISTINCT ?s
+                SELECT DISTINCT ?controllerInteraction ?o ?controllerNode
                 WHERE {
-                  ?s a wp:DataNode
+                  ?controllerInteraction a wp:Interaction .
+                  ?controllerInteraction wp:source ?controllerNode .
+                  ?controllerInteraction wp:target ?o .
+                  ?o a wp:Interaction
                 }''')
 
 #             qres = g.query(
 #                 '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
+#                 SELECT DISTINCT ?s ?o
+#                 WHERE {
+#                   ?s a wp:DirectedInteraction .
+#                   ?s wp:target ?o
+#                 }''')
+
+#             qres = g.query(
+#                 '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
+#                 SELECT DISTINCT ?s
+#                 WHERE {
+#                   ?s a wp:DataNode
+#                 }''')
+
+#             qres = g.query(
+#                 '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
 #                 SELECT *
-#                 {
-#                   ?s <http://vocabularies.wikipathways.org/wp#isAbout> ?o
-#                 }''')
-
-#             qres = g.query(
-#                 '''SELECT *
-#                 {
-#                   ?s <http://vocabularies.wikipathways.org/wp#isAbout> ?o
-#                 }''')
-
-#             qres = g.query(
-#                 '''SELECT DISTINCT ?s ?o
 #                 {
 #                   ?s <http://vocabularies.wikipathways.org/wp#isAbout> ?o
 #                 }''')
@@ -91,34 +112,19 @@ def parse_rdf():
 #                 }
 #                 ''')
 
-#             qres = g.query(
-#                 '''SELECT ?aisAbout
-#                 ''')
-
-#             qres = g.query(
-#                 '''@prefix wp:    <http://vocabularies.wikipathways.org/wp#> .
-#                 SELECT DISTINCT ?wp:isAbout
-#                 ''')
-#             print 'qres'
-#             print qres
-#             print ''
-#             print 'type'
-#             print type(qres)
-#             print ''
-#             print 'dir'
-#             print dir(qres)
-#             print ''
-#             print 'qres.__dict__'
-#             print qres.__dict__
-#             print ''
-#             print 'qres.serialize()'
-#             print qres.serialize()
             for row in qres:
-#                 print 'qres row'
-#                 print row
-                for item in row:
-                    print '  ' + item
-                # print('%s is the id' % row)
+                print('**************************')
+                print('  %s: ' % row.controllerInteraction)
+                print('  o: ' + row.o)
+                print('  controllerNode: ' + row.controllerNode)
+                qres1 = g.query(
+                    '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
+                    SELECT DISTINCT ?participant
+                    WHERE {
+                      <%s> wp:participants ?participant
+                    }''' % (row.o))
+                for participantRow in qres1:
+                    print('  participant: ' + participantRow.participant)
 
 # download_rdf(version, 'gpml')
 # download_rdf(version, 'wp')

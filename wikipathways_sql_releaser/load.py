@@ -1,7 +1,9 @@
 import os.path
-import sqlalchemy
+# import sqlalchemy
 from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import Table, Column, String, MetaData
+# from sqlalchemy import Integer
+# from sqlalchemy import ForeignKey
 from sqlalchemy.sql import text
 
 # keeping this here in case I need it again
