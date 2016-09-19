@@ -21,7 +21,13 @@ Install dependencies:
 pip install -e .
 ```
 
-Install a new dependency (`SQLAlchemy` in this example):
+Run (this isn't done, and it expects pathways.db not to already exist):
+
+```
+python wikipathways_sql_releaser/extract.py 
+```
+
+How to install a new dependency (`SQLAlchemy` in this example):
 
 ```
 pip install SQLAlchemy
