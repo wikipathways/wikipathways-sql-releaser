@@ -1,5 +1,6 @@
 import glob
 import os
+from load import load
 from rdflib import Graph
 # we need to use the following to
 # serialize to JSON-LD
@@ -46,6 +47,15 @@ def download_rdf(version, aspect):
     zipfile.extractall(extract_dir + '/rdf')
 
 
+def load_node(id, label, source):
+    node = {}
+    node['id'] = str(id)
+    node['label'] = str(label)
+    node['source'] = str(source)
+    os.chdir('..')
+    load((node,))
+    os.chdir(extract_dir)
+
 def parse_rdf():
     i = 0
     for file in glob.glob('rdf/wp/*/*.ttl'):
@@ -72,29 +82,50 @@ def parse_rdf():
             #
             # if possible, also get all binding and cleavage reactions.
 
-            qres = g.query(
+            controller_results = g.query(
                 '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
-                SELECT DISTINCT ?controllerInteraction ?controlledInteraction ?controllerNode
+                PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+                SELECT DISTINCT ?controllerInteraction ?controlledInteraction ?controllerNodeId ?controllerNodeLabel ?controllerNodeSource
                 WHERE {
                   ?controllerInteraction a wp:Interaction .
-                  ?controllerInteraction wp:source ?controllerNode .
+                  ?controllerInteraction wp:source ?controllerNodeId .
+                  ?controllerNodeId rdfs:label ?controllerNodeLabel .
+                  ?controllerNodeId dc:source ?controllerNodeSource .
                   ?controllerInteraction wp:target ?controlledInteraction .
-                  ?o a wp:Interaction
+                  ?controlledInteraction a wp:Interaction
                 }''')
 
-            for row in qres:
-                print('**************************')
-                print('  %s: ' % row.controllerInteraction)
-                print('  %s: ' % row.controlledInteraction)
-                print('  %s: ' % row.controllerNode)
-                qres1 = g.query(
+            for controller_row in controller_results:
+                load_node(
+                    str(controller_row.controllerNodeId),
+                    str(controller_row.controllerNodeLabel),
+                    str(controller_row.controllerNodeSource)
+                )
+                controlled_results = g.query(
                     '''PREFIX wp:    <http://vocabularies.wikipathways.org/wp#>
-                    SELECT DISTINCT ?participant
+                    PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+                    PREFIX dc:    <http://purl.org/dc/elements/1.1/>
+                    SELECT DISTINCT ?sourceId ?sourceLabel ?sourceSource ?targetId ?targetLabel ?targetSource
                     WHERE {
-                      <%s> wp:participants ?participant
-                    }''' % (row.o))
-                for participantRow in qres1:
-                    print('  %s: ' % participantRow.participant)
+                      <%s> wp:source ?sourceId .
+                      ?sourceId rdfs:label ?sourceLabel .
+                      ?sourceId dc:source ?sourceSource .
+                      <%s> wp:target ?targetId .
+                      ?targetId rdfs:label ?targetLabel .
+                      ?targetId dc:source ?targetSource
+                    }''' % (controller_row.controlledInteraction, controller_row.controlledInteraction))
+                for controlled_row in controlled_results:
+                    load_node(
+                        str(controlled_row.sourceId),
+                        str(controlled_row.sourceLabel),
+                        str(controlled_row.sourceSource)
+                    )
+                    load_node(
+                        str(controlled_row.targetId),
+                        str(controlled_row.targetLabel),
+                        str(controlled_row.targetSource)
+                    )
 
 # download_rdf(version, 'gpml')
 # download_rdf(version, 'wp')
